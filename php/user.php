@@ -42,22 +42,40 @@ class user
         return $result;
     }
 
-    function __construct(string $username, string $password = null)
+    public $role;
+
+    function __construct(string $username, string $password = null, string $role = "user")
     {
         $this->username = $username;
+        $this->role = $role;
 
         if (!is_null($password)) {
             $connection = new mysqli("localhost", "root", "", "smartschool");
 
-            $stmt = $connection->prepare("INSERT INTO users SET username = ?, hash = ?;");
+            $stmt = $connection->prepare("INSERT INTO users SET username = ?, hash = ?, role = ?;");
 
             $hash = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt->bind_param("ss", $username, $hash);
+            $stmt->bind_param("ss", $username, $hash, $role);
 
             $stmt->execute();
 
             $connection->close();
+        } else {
+            $connection = new mysqli("localhost", "root", "", "smartschool");
+
+            $stmt = $connection->prepare("SELECT role FROM users WHERE username = ?;");
+
+            $stmt->bind_param("s", $username);
+
+            $stmt->bind_result($role);
+
+            if ($stmt->execute()) {
+                $stmt->fetch();
+                $stmt->close();
+            }
+
+            $this->role = $role;
         }
     }
 }
