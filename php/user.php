@@ -76,6 +76,33 @@ class user
             }
 
             $this->role = $role;
+
+            $connection->close();
         }
+    }
+
+    public function has_permission(int $level): bool
+    {
+        $connection = new mysqli("localhost", "root", "", "smartschool");
+
+        $stmt = $connection->prepare("SELECT level FROM roles WHERE name = ?;");
+
+        $stmt->bind_param("s", $this->role);
+
+        $stmt->bind_result($actual_level);
+
+        $valid = false;
+
+        if($stmt->execute()) {
+            if($stmt->fetch()) {
+                $valid = $actual_level <= $level;
+            }
+
+            $stmt->close();
+        }
+
+        $connection->close();
+
+        return $valid;
     }
 }
