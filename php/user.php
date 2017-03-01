@@ -44,6 +44,21 @@ class user
 
     public $role;
 
+    public function setRole($role): user
+    {
+        $connection = new mysqli("localhost", "root", "", "smartschool");
+
+        $stmt = $connection->prepare("UPDATE users SET role = ? WHERE username = ?;");
+
+        $stmt->bind_param("ss", $role, $this->username);
+
+        $stmt->execute();
+
+        $this->role = $role;
+
+        return $this;
+    }
+
     function __construct(string $username, string $password = null, string $role = "user")
     {
         $this->username = $username;
@@ -56,7 +71,7 @@ class user
 
             $hash = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt->bind_param("ss", $username, $hash, $role);
+            $stmt->bind_param("sss", $username, $hash, $role);
 
             $stmt->execute();
 
@@ -93,8 +108,8 @@ class user
 
         $valid = false;
 
-        if($stmt->execute()) {
-            if($stmt->fetch()) {
+        if ($stmt->execute()) {
+            if ($stmt->fetch()) {
                 $valid = $actual_level <= $level;
             }
 
