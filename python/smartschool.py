@@ -3,7 +3,6 @@ import json
 import sys
 
 ip = "localhost";
-id = 1;
 
 def addReading(id, value):
     response = urllib.request.urlopen("http://" + ip + "/smartschool/addReading.php?id=" + str(id) + "&value=" + str(value)).read();
