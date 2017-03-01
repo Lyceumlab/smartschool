@@ -25,8 +25,8 @@ SmSc.Sensor = class Sensor{
             method:"GET",
             dataType:"JSON",
             data:SmSc.addCredentials({
-                location:this.location,
-                type:this.type
+                location:sensor.location,
+                type:sensor.type
             }),
             success:function(response) {
                 var nSensor = response.sensor || {};
@@ -53,6 +53,10 @@ SmSc.Sensor = class Sensor{
             var reading = new SmSc.Reading(this, value, 0);
             reading.insert();
             this.readings.push(reading);
+        } else {
+            var reading = value;
+            reading.insert();
+            this.readings.push(reading);
         }
     }
 }
@@ -63,6 +67,7 @@ SmSc.getSensors = function getSensors(callback) {
         dataType:"JSON",
         data:SmSc.credentials,
         success:function(response) {
+            console.log(response);
             var sensors = [];
             for(var x in response.sensors) {
                 var object = response.sensors[x].sensor;
