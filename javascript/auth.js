@@ -17,13 +17,16 @@ SmSc.addCredentials = function(object) {
 }
 
 SmSc.Credentials = class Credentials {
-    constructor(username, password) {
+    constructor(username, password, role) {
         this.username = username;
         this.password = password;
+        this.role = role || "";
     }
     
     verify(callback) {
         callback = callback || function(){};
+        
+        var credentials = this;
         
         $.ajax(SmSc.url + "/login.php", {
             method:"GET",
@@ -35,6 +38,7 @@ SmSc.Credentials = class Credentials {
             success:function(response) {
                 var valid = response.valid || false;
                 var err = response.err || null;
+                credentials.role = response.role || "";
                 callback(valid, err);
             },
             error:function() {
