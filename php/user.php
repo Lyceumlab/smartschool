@@ -54,6 +54,8 @@ class user
 
         $stmt->execute();
 
+        $connection->close();
+
         $this->role = $role;
 
         return $this;
@@ -120,4 +122,25 @@ class user
 
         return $valid;
     }
+}
+
+function getUsers() {
+    $connection = new mysqli("localhost", "root", "", "smartschool");
+
+    $stmt = $connection->prepare("SELECT username FROM users;");
+
+    $stmt->bind_result($username);
+
+    $result = array();
+
+    if($stmt->execute()) {
+        while($stmt->fetch()) {
+            array_push($result, new user($username));
+        }
+        $stmt->close();
+    }
+
+    $connection->close();
+
+    return $result;
 }
