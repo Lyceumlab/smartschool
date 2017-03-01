@@ -11,4 +11,4 @@ def addReading(id, value):
 def getReading(id):
     response = urllib.request.urlopen("http://" + ip + "/smartschool/getReading.php?id=" + str(id)).read();
     data = json.loads(response);
-    return data.value;
+    return data['value'];
