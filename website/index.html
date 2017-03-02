@@ -4,6 +4,7 @@
 <script src="sensor.js"></script>
 <script src="auth.js"></script>
 <script src="reading.js"></script>
+<script src="displayTypes.js"></script>
 
 <link rel="stylesheet" href="stylesheet.css">
 
@@ -13,14 +14,30 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-<div ng-app="myapp" ng-controller="ctrl" class="container-fluid">
+<div ng-app="myapp" ng-controller="ctrl" class="container-fluid" ng-init="registering = false">
     <div class="jumbotron title">
         <h1>Smartschool</h1>
         <p>Gemaakt door Thomas Duursma, Lyceumlab</p>
     </div>
 
     <div class="well" ng-hide="loggedIn">
-        <form>
+        <form ng-show="registering">
+            <div class="form-group">
+                <label for="username">Gebruikersnaam:</label>
+                <input type="text" class="form-control" id="username" ng-model="username">
+            </div>
+            <div class="form-group">
+                <label for="pwd">Wachtwoord:</label>
+                <input type="password" class="form-control" id="pwd" ng-model="password">
+            </div>
+            <div class="form-group">
+                <label for="pwd">Wachtwoord opnieuw invoeren:</label>
+                <input type="password" class="form-control" id="pwd" ng-model="passwordCheck">
+            </div>
+            <button type="submit" class="btn btn-default" ng-click="register()" ng-disabled="passwordCheck != password || password == '' || password == null">Registreer</button>
+            <button type="button" class="btn btn-default" ng-click="registering = false">Annuleer</button>
+        </form>
+        <form ng-hide="registering">
             <div class="form-group">
                 <label for="username">Gebruikersnaam:</label>
                 <input type="text" class="form-control" id="username" ng-model="credentials.username">
@@ -29,7 +46,8 @@
                 <label for="pwd">Wachtwoord:</label>
                 <input type="password" class="form-control" id="pwd" ng-model="credentials.password">
             </div>
-            <button type="submit" class="btn btn-default" ng-click="login()">Login</button>
+            <button type="submit" class="btn btn-primary" ng-click="login()">Login</button>
+            <button type="button" class="btn btn-default" ng-click="registering = true">Registreer</button>
         </form>
     </div>
 
@@ -55,7 +73,7 @@
                         <td>{{sensor.id}}</td>
                         <td>{{sensor.location}}</td>
                         <td>{{sensor.type}}</td>
-                        <td>{{sensor.reading.value || 'niet beschikbaar'}}</td>
+                        <td ng-bind-html="sensor | sensorValue"></td>
                     </tr>
                 </tbody>
             </table>
@@ -81,11 +99,19 @@
     SmSc.url = "http://localhost/smartschool";
 
     var app = angular.module("myapp", []);
-    app.controller("ctrl", function($scope) {
+
+    app.filter("sensorValue", function($sce){
+        return function(sensor) {
+            if(!SmSc.displayTypes.hasOwnProperty(sensor.type)) return $sce.trustAsHtml(sensor.reading != null ? sensor.reading.value.toString() : 'Niet beschikbaar');
+            return $sce.trustAsHtml(sensor.reading != null ? SmSc.displayTypes[sensor.type](sensor).toString() : 'Niet beschikbaar');
+        }
+    });
+
+    app.controller("ctrl", function($scope, $sce) {
         $scope.sensors = [];
-        
+
         $scope.newSensor = new SmSc.Sensor();
-        
+
         $scope.addSensor = function addSensor() {
             $scope.newSensor.insert(function(sensor, err) {
                 if(err) console.log(err);
@@ -98,12 +124,20 @@
                 }
             })
         }
-        
+
         $scope.login = function login() {
             SmSc.credentials = new SmSc.Credentials($scope.credentials.username, $scope.credentials.password);
             SmSc.credentials.verify($scope.verifyCallback)
         }
-        
+
+        $scope.register = function () {
+            SmSc.register($scope.username, $scope.password, function() {
+                console.log("t");
+                $scope.credentials = new SmSc.Credentials($scope.username, $scope.password);
+                $scope.login();
+            })
+        }
+
         $scope.verifyCallback = function verifyCallback(valid, err) {
             if(err) console.log(err);
             else if(valid) {
