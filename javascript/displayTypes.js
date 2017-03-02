@@ -9,3 +9,7 @@ SmSc.displayTypes.thermometer = function(sensor) {
 SmSc.displayTypes.lock = function(sensor) {
     return sensor.reading.value > 0 ? "	&#128274;" : "	&#128275;";
 }
+
+SmSc.displayTypes.barometer = function(sensor) {
+    return sensor.reading.value / 10 + " bar"
+}
