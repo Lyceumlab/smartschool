@@ -6,7 +6,7 @@ ip = "localhost";
 
 def addReading(id, value):
     response = urllib.request.urlopen("http://" + ip + "/smartschool/addReading.php?id=" + str(id) + "&value=" + str(value)).read();
-    return true;
+    return True;
 
 def getReading(id):
     response = urllib.request.urlopen("http://" + ip + "/smartschool/getReading.php?id=" + str(id)).read();
