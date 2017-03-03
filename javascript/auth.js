@@ -48,3 +48,23 @@ SmSc.Credentials = class Credentials {
         })
     }
 }
+
+SmSc.register = function (username, password, callback) {
+    callback = callback || function() {};
+    
+    $.ajax(SmSc.url + "/register.php", {
+        method:"GET",
+        dataType:"JSON",
+        data:{
+            username:username,
+            password:password
+        },
+        success:function(response) {
+            if(response.err) console.log(err);
+            else callback();
+        },
+        error:function() {
+            console.log(arguments);
+        }
+    })
+}
