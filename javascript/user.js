@@ -23,3 +23,19 @@ SmSc.User = class User {
         return this._role;
     }
 }
+
+SmSc.getUsers = function getUsers(callback) {
+    callback = callback || function() {};
+    $.ajax(SmSc.url + "/getUsers.php", {
+        method:"GET",
+        dataType:"JSON",
+        data:SmSc.credentials,
+        success:function(response) {
+            var users = [];
+            for(var i in response.users) {
+                users[i] = new SmSc.User(response.users[i].username, response.users[i].role);
+            }
+            callback(users, response.err);
+        }
+    })
+}
