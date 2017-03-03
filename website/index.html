@@ -5,6 +5,7 @@
 <script src="auth.js"></script>
 <script src="reading.js"></script>
 <script src="displayTypes.js"></script>
+<script src="user.js"></script>
 
 <link rel="stylesheet" href="stylesheet.css">
 
@@ -54,6 +55,7 @@
     <ul class="nav nav-tabs" ng-show="loggedIn">
         <li class="active"><a data-toggle="tab" href="#sensors">Sensoren</a></li>
         <li ng-show="credentials.role == 'admin'"><a data-toggle="tab" href="#addSensor">Sensor toevoegen</a></li>
+        <li ng-show="credentials.role == 'admin'"><a data-toggle="tab" href="#manageUsers">Gebruikers beheren</a></li>
     </ul>
 
     <div class="tab-content" ng-show="loggedIn">
@@ -78,7 +80,7 @@
                 </tbody>
             </table>
         </div>
-        <div ng-show="credentials.role == 'admin'" id="addSensor" class="tab-pane fade">
+        <div ng-show="credentials.role == 'admin' && loggedIn" id="addSensor" class="tab-pane fade">
             <h3>Sensor toeveoegen</h3>
             <form>
                 <div class="form-group">
@@ -91,6 +93,27 @@
                 </div>
                 <button type="submit" class="btn btn-default" ng-click="addSensor()">Toevoegen</button>
             </form>
+        </div>
+        <div ng-show="credentials.role == 'admin' && loggedIn" id="manageUsers" class="tab-pane fade">
+            <h3>Gebruikers beheren</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Gebruikersnaam</th><th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-hide="credentials.username == user.username" ng-repeat="user in users">
+                        <td>{{user.username}}</td>
+                        <td>
+                            <select class="form-control" ng-model="user.role">
+                                <option value="user">Gebruiker</option>
+                                <option value="admin">Beheerder</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -109,7 +132,7 @@
 
     app.controller("ctrl", function($scope, $sce) {
         $scope.sensors = [];
-
+        
         $scope.newSensor = new SmSc.Sensor();
 
         $scope.addSensor = function addSensor() {
@@ -131,8 +154,7 @@
         }
 
         $scope.register = function () {
-            SmSc.register($scope.username, $scope.password, function() {
-                console.log("t");
+            SmSc.register($scope.username, $scope.password, function() {    
                 $scope.credentials = new SmSc.Credentials($scope.username, $scope.password);
                 $scope.login();
             })
@@ -148,6 +170,14 @@
                     else {
                         console.log(sensors);
                         $scope.sensors = sensors;
+                        $scope.$apply();
+                    }
+                })
+                SmSc.getUsers(function(users, err) {
+                    if(err) console.log(err);
+                    else {
+                        console.log(users);
+                        $scope.users = users;
                         $scope.$apply();
                     }
                 })
